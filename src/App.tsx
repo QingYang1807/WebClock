@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Clock, Monitor, Layers, Moon, Sun, Palette, Check } from 'lucide-react';
 
 type ClockMode = 'analog' | 'digital' | 'both';
-type ClockStyle = 'swiss' | 'classic' | 'modern' | 'bauhaus';
+type ClockStyle = 'swiss' | 'classic' | 'modern' | 'bauhaus' | 'ipad';
 
 interface ClockFaceProps {
   isDark: boolean;
@@ -178,6 +178,161 @@ const BauhausFace: React.FC<ClockFaceProps> = ({ isDark, hourAngle, minuteAngle,
   </svg>
 );
 
+const IpadFace: React.FC<ClockFaceProps> = ({ hourAngle, minuteAngle, secondAngle }) => {
+  const numerals = Array.from({ length: 12 }, (_, index) => index + 1);
+  
+  const polarPointPct = (radius: number, angleDeg: number) => {
+    const angle = (angleDeg - 90) * Math.PI / 180;
+    return {
+      x: 50 + Math.cos(angle) * radius,
+      y: 50 + Math.sin(angle) * radius
+    };
+  };
+
+  const chapterOuterRadius = 41.8;
+  const numeralRadius = 31.5;
+
+  return (
+    <div className="w-full h-full rounded-full relative overflow-hidden flex items-center justify-center"
+         style={{
+            background: `radial-gradient(circle at 32% 28%, rgba(255, 255, 255, 0.88), transparent 22%),
+                         linear-gradient(145deg, #fbfbfa 0%, #eff1f4 42%, #d9dde3 100%)`,
+            border: 'min(1.05vmin, 10px) solid rgba(255, 255, 255, 0.46)',
+            boxShadow: `0 34px 65px rgba(3, 8, 18, 0.34),
+                        0 10px 24px rgba(14, 24, 40, 0.18),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.96),
+                        inset 0 -8px 18px rgba(91, 102, 123, 0.14)`
+         }}>
+         <div className="absolute rounded-full" style={{
+            inset: '3.6%',
+            background: 'radial-gradient(circle at 30% 26%, rgba(255, 255, 255, 0.42), transparent 36%)',
+            boxShadow: 'inset 0 0 0 1px rgba(83, 92, 110, 0.16), inset 0 0 20px rgba(255, 255, 255, 0.18)'
+         }} />
+         <div className="absolute rounded-full z-0" style={{
+            inset: '8.8%',
+            boxShadow: 'inset 0 0 0 1px rgba(74, 85, 106, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.22)'
+         }} />
+
+         {Array.from({ length: 60 }).map((_, i) => {
+            const quarter = i % 15 === 0;
+            const major = i % 5 === 0;
+            const angleDeg = i * 6;
+            const width = quarter ? '1.2%' : major ? '0.75%' : '0.26%';
+            const height = quarter ? '8.8%' : major ? '6%' : '4.2%';
+            const radius = chapterOuterRadius - (parseFloat(height) / 2);
+            const point = polarPointPct(radius, angleDeg);
+
+            return (
+              <div key={`tick-${i}`} className="absolute z-10 rounded-full" style={{
+                width,
+                height,
+                left: `${point.x}%`,
+                top: `${point.y}%`,
+                background: quarter ? 'rgba(22, 33, 53, 0.88)' : major ? 'rgba(34, 45, 66, 0.7)' : 'rgba(58, 67, 85, 0.26)',
+                boxShadow: '0 0 0 0.5px rgba(255, 255, 255, 0.08)',
+                transform: `translate(-50%, -50%) rotate(${angleDeg}deg)`
+              }} />
+            );
+         })}
+
+         {numerals.map(value => {
+            const point = polarPointPct(numeralRadius, value * 30);
+            const isQuarter = value % 3 === 0 || value === 12;
+            return (
+              <div key={`num-${value}`} className="absolute z-20 text-center" style={{
+                left: `${point.x}%`,
+                top: `${point.y}%`,
+                transform: 'translate(-50%, -50%)',
+                fontFamily: '"Avenir Next", "SF Pro Display", "Helvetica Neue", sans-serif',
+                fontSize: isQuarter ? 'clamp(21px, 3.1vmin, 34px)' : 'clamp(18px, 2.55vmin, 28px)',
+                fontWeight: isQuarter ? 650 : 600,
+                color: isQuarter ? 'rgba(18, 28, 46, 0.9)' : 'rgba(24, 34, 52, 0.72)',
+                textShadow: '0 1px 0 rgba(255, 255, 255, 0.46)',
+                fontVariantNumeric: 'lining-nums',
+                letterSpacing: '0.01em',
+                lineHeight: 1.1,
+                minWidth: '2.6ch'
+              }}>
+                {value}
+              </div>
+            );
+         })}
+
+         <div className="absolute z-30 rounded-full" style={{
+            left: '50%',
+            bottom: '50%',
+            transformOrigin: '50% 100%',
+            width: 'max(1.45vmin, 10px)',
+            height: '23%',
+            marginLeft: 'calc(max(1.45vmin, 10px) / -2)',
+            background: 'linear-gradient(180deg, rgba(45, 58, 86, 0.98), rgba(22, 30, 46, 0.98))',
+            clipPath: 'polygon(50% 0, 84% 12%, 66% 100%, 34% 100%, 16% 12%)',
+            boxShadow: '0 7px 14px rgba(12, 17, 30, 0.16)',
+            transform: `rotate(${hourAngle}deg)`
+         }} />
+
+         <div className="absolute z-30 rounded-full" style={{
+            left: '50%',
+            bottom: '50%',
+            transformOrigin: '50% 100%',
+            width: 'max(1vmin, 6px)',
+            height: '34%',
+            marginLeft: 'calc(max(1vmin, 6px) / -2)',
+            background: 'linear-gradient(180deg, rgba(77, 87, 107, 0.96), rgba(55, 63, 80, 0.96))',
+            clipPath: 'polygon(50% 0, 80% 10%, 62% 100%, 38% 100%, 20% 10%)',
+            boxShadow: '0 7px 14px rgba(12, 17, 30, 0.12)',
+            transform: `rotate(${minuteAngle}deg)`
+         }} />
+
+         <div className="absolute z-30" style={{
+            left: '50%',
+            bottom: '50%',
+            transformOrigin: '50% 100%',
+            width: '2px',
+            height: '38%',
+            marginLeft: '-1px',
+            background: 'linear-gradient(180deg, #dd4158, #b0162d)',
+            boxShadow: '0 0 12px rgba(176, 22, 45, 0.12)',
+            transform: `rotate(${secondAngle}deg)`
+         }}>
+            <div className="absolute rounded-full" style={{
+              left: '50%',
+              bottom: '-23%',
+              width: '12px',
+              height: '12px',
+              transform: 'translateX(-50%)',
+              border: '2px solid rgba(207, 41, 65, 0.96)',
+              background: 'rgba(251, 251, 250, 0.92)'
+            }} />
+            <div className="absolute" style={{
+              left: '50%',
+              bottom: '-30%',
+              width: '2px',
+              height: '28%',
+              transform: 'translateX(-50%)',
+              background: 'rgba(207, 41, 65, 0.95)',
+              borderRadius: 'inherit'
+            }} />
+         </div>
+
+         <div className="absolute z-40 rounded-full" style={{
+            left: '50%',
+            top: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '7.4%',
+            aspectRatio: '1',
+            background: 'radial-gradient(circle at 30% 30%, #42506a 0%, #202a3d 56%, #121825 100%)',
+            boxShadow: '0 3px 10px rgba(11, 16, 28, 0.2), 0 0 0 2px rgba(255, 255, 255, 0.28)'
+         }}>
+            <div className="absolute rounded-full" style={{
+              inset: '35%',
+              background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(228, 232, 238, 0.96))'
+            }} />
+         </div>
+    </div>
+  );
+};
+
 // --- Main App Component ---
 
 export default function App() {
@@ -243,13 +398,20 @@ export default function App() {
       time: 'font-sans font-black tracking-tighter',
       color: isDark ? 'text-indigo-100' : 'text-indigo-900',
       dateColor: isDark ? 'text-indigo-300' : 'text-indigo-600'
+    },
+    ipad: {
+      date: 'font-sans font-medium tracking-wide',
+      time: 'font-sans font-semibold tracking-wider',
+      color: isDark ? 'text-slate-100' : 'text-slate-800',
+      dateColor: isDark ? 'text-slate-300' : 'text-slate-500'
     }
   };
 
   const currentTypo = typographyStyles[style];
 
   // Backgrounds based on style and theme
-  const getBackground = () => {
+  const getBackgroundClass = () => {
+    if (style === 'ipad') return '';
     if (isDark) {
       switch (style) {
         case 'classic': return 'bg-stone-950';
@@ -267,8 +429,24 @@ export default function App() {
     }
   };
 
+  const getBackgroundStyle = () => {
+    if (style === 'ipad') {
+      return {
+        background: `
+          radial-gradient(circle at 22% 18%, rgba(120, 154, 197, 0.16), transparent 26%),
+          radial-gradient(circle at 78% 82%, rgba(211, 156, 106, 0.18), transparent 30%),
+          linear-gradient(140deg, #07101a 0%, #13243a 54%, #544943 100%)
+        `
+      };
+    }
+    return {};
+  };
+
   return (
-    <div className={`min-h-screen flex flex-col items-center justify-center transition-colors duration-700 ${getBackground()}`}>
+    <div 
+      className={`min-h-screen flex flex-col items-center justify-center transition-colors duration-700 ${getBackgroundClass()}`}
+      style={getBackgroundStyle()}
+    >
       
       {/* Top Header Controls */}
       <div className="absolute top-6 right-6 md:top-8 md:right-8 flex items-center gap-4 z-10">
@@ -330,6 +508,7 @@ export default function App() {
                   {style === 'classic' && <ClassicFace isDark={isDark} hourAngle={hourAngle} minuteAngle={minuteAngle} secondAngle={secondAngle} />}
                   {style === 'modern' && <ModernFace isDark={isDark} hourAngle={hourAngle} minuteAngle={minuteAngle} secondAngle={secondAngle} />}
                   {style === 'bauhaus' && <BauhausFace isDark={isDark} hourAngle={hourAngle} minuteAngle={minuteAngle} secondAngle={secondAngle} />}
+                  {style === 'ipad' && <IpadFace isDark={isDark} hourAngle={hourAngle} minuteAngle={minuteAngle} secondAngle={secondAngle} />}
                 </motion.div>
               </AnimatePresence>
             </motion.div>
@@ -364,7 +543,7 @@ export default function App() {
           </div>
           <div className="h-6 w-px bg-zinc-500/30 mx-1" />
           
-          {(['swiss', 'classic', 'modern', 'bauhaus'] as ClockStyle[]).map((s) => (
+          {(['swiss', 'classic', 'modern', 'bauhaus', 'ipad'] as ClockStyle[]).map((s) => (
             <button
               key={s}
               onClick={() => setStyle(s)}
