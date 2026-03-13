@@ -1,0 +1,5 @@
+{
+  "name": "Web Clock",
+  "description": "A web-based analog and digital clock with mode switching.",
+  "requestFramePermissions": []
+}
