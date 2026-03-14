@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Clock, Monitor, Layers, Moon, Sun, Palette, Check } from 'lucide-react';
 
 type ClockMode = 'analog' | 'digital' | 'both';
-type ClockStyle = 'swiss' | 'classic' | 'modern' | 'bauhaus' | 'ipad';
+type ClockStyle = 'swiss' | 'classic' | 'modern' | 'bauhaus' | 'ipad' | 'ipadpro';
 
 interface ClockFaceProps {
   isDark: boolean;
@@ -404,6 +404,12 @@ export default function App() {
       time: 'font-sans font-semibold tracking-wider',
       color: isDark ? 'text-slate-100' : 'text-slate-800',
       dateColor: isDark ? 'text-slate-300' : 'text-slate-500'
+    },
+    ipadpro: {
+      date: '',
+      time: '',
+      color: '',
+      dateColor: ''
     }
   };
 
@@ -411,7 +417,7 @@ export default function App() {
 
   // Backgrounds based on style and theme
   const getBackgroundClass = () => {
-    if (style === 'ipad') return '';
+    if (style === 'ipad' || style === 'ipadpro') return '';
     if (isDark) {
       switch (style) {
         case 'classic': return 'bg-stone-950';
@@ -447,9 +453,12 @@ export default function App() {
       className={`min-h-screen flex flex-col items-center justify-center transition-colors duration-700 ${getBackgroundClass()}`}
       style={getBackgroundStyle()}
     >
+      {style === 'ipadpro' ? (
+        <iframe src="/ipadpro.html" className="absolute inset-0 w-full h-full border-none z-0" title="iPad Pro Clock" />
+      ) : null}
       
       {/* Top Header Controls */}
-      <div className="absolute top-6 right-6 md:top-8 md:right-8 flex items-center gap-4 z-10">
+      <div className={`absolute top-6 right-6 md:top-8 md:right-8 flex items-center gap-4 z-10 ${style === 'ipadpro' ? 'opacity-0 hover:opacity-100 transition-opacity duration-300' : ''}`}>
         <div className={`flex p-1 rounded-full backdrop-blur-md shadow-sm transition-colors duration-500 ${isDark ? 'bg-white/10 border border-white/5' : 'bg-black/5 border border-black/5'}`}>
           <button
             onClick={() => setMode('analog')}
@@ -484,58 +493,60 @@ export default function App() {
       </div>
 
       {/* Main Content */}
-      <div className="flex flex-col items-center justify-center gap-12 md:gap-16 w-full max-w-4xl p-8 z-0">
-        <AnimatePresence mode="popLayout">
-          {(mode === 'analog' || mode === 'both') && (
-            <motion.div
-              key="analog"
-              initial={{ opacity: 0, scale: 0.8, filter: 'blur(10px)' }}
-              animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
-              exit={{ opacity: 0, scale: 0.8, filter: 'blur(10px)' }}
-              transition={{ type: 'spring', bounce: 0.3, duration: 0.8 }}
-              className="relative w-72 h-72 md:w-96 md:h-96"
-            >
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={style + (isDark ? 'dark' : 'light')}
-                  initial={{ opacity: 0, rotate: -10 }}
-                  animate={{ opacity: 1, rotate: 0 }}
-                  exit={{ opacity: 0, rotate: 10 }}
-                  transition={{ duration: 0.4 }}
-                  className="w-full h-full"
-                >
-                  {style === 'swiss' && <SwissFace isDark={isDark} hourAngle={hourAngle} minuteAngle={minuteAngle} secondAngle={secondAngle} />}
-                  {style === 'classic' && <ClassicFace isDark={isDark} hourAngle={hourAngle} minuteAngle={minuteAngle} secondAngle={secondAngle} />}
-                  {style === 'modern' && <ModernFace isDark={isDark} hourAngle={hourAngle} minuteAngle={minuteAngle} secondAngle={secondAngle} />}
-                  {style === 'bauhaus' && <BauhausFace isDark={isDark} hourAngle={hourAngle} minuteAngle={minuteAngle} secondAngle={secondAngle} />}
-                  {style === 'ipad' && <IpadFace isDark={isDark} hourAngle={hourAngle} minuteAngle={minuteAngle} secondAngle={secondAngle} />}
-                </motion.div>
-              </AnimatePresence>
-            </motion.div>
-          )}
+      {style !== 'ipadpro' && (
+        <div className="flex flex-col items-center justify-center gap-12 md:gap-16 w-full max-w-4xl p-8 z-0">
+          <AnimatePresence mode="popLayout">
+            {(mode === 'analog' || mode === 'both') && (
+              <motion.div
+                key="analog"
+                initial={{ opacity: 0, scale: 0.8, filter: 'blur(10px)' }}
+                animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+                exit={{ opacity: 0, scale: 0.8, filter: 'blur(10px)' }}
+                transition={{ type: 'spring', bounce: 0.3, duration: 0.8 }}
+                className="relative w-72 h-72 md:w-96 md:h-96"
+              >
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={style + (isDark ? 'dark' : 'light')}
+                    initial={{ opacity: 0, rotate: -10 }}
+                    animate={{ opacity: 1, rotate: 0 }}
+                    exit={{ opacity: 0, rotate: 10 }}
+                    transition={{ duration: 0.4 }}
+                    className="w-full h-full"
+                  >
+                    {style === 'swiss' && <SwissFace isDark={isDark} hourAngle={hourAngle} minuteAngle={minuteAngle} secondAngle={secondAngle} />}
+                    {style === 'classic' && <ClassicFace isDark={isDark} hourAngle={hourAngle} minuteAngle={minuteAngle} secondAngle={secondAngle} />}
+                    {style === 'modern' && <ModernFace isDark={isDark} hourAngle={hourAngle} minuteAngle={minuteAngle} secondAngle={secondAngle} />}
+                    {style === 'bauhaus' && <BauhausFace isDark={isDark} hourAngle={hourAngle} minuteAngle={minuteAngle} secondAngle={secondAngle} />}
+                    {style === 'ipad' && <IpadFace isDark={isDark} hourAngle={hourAngle} minuteAngle={minuteAngle} secondAngle={secondAngle} />}
+                  </motion.div>
+                </AnimatePresence>
+              </motion.div>
+            )}
 
-          {(mode === 'digital' || mode === 'both') && (
-            <motion.div
-              key="digital"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 20 }}
-              transition={{ type: 'spring', bounce: 0.4, duration: 0.8 }}
-              className={`flex flex-col items-center text-center transition-all duration-500 ${currentTypo.color}`}
-            >
-              <div className={`mb-2 transition-colors duration-500 ${currentTypo.date} ${currentTypo.dateColor}`}>
-                {formattedDate}
-              </div>
-              <div className={`text-6xl md:text-8xl tabular-nums transition-all duration-500 ${currentTypo.time}`}>
-                {formattedTime}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+            {(mode === 'digital' || mode === 'both') && (
+              <motion.div
+                key="digital"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                transition={{ type: 'spring', bounce: 0.4, duration: 0.8 }}
+                className={`flex flex-col items-center text-center transition-all duration-500 ${currentTypo.color}`}
+              >
+                <div className={`mb-2 transition-colors duration-500 ${currentTypo.date} ${currentTypo.dateColor}`}>
+                  {formattedDate}
+                </div>
+                <div className={`text-6xl md:text-8xl tabular-nums transition-all duration-500 ${currentTypo.time}`}>
+                  {formattedTime}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      )}
 
       {/* Bottom Style Selector */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2">
+      <div className={`absolute bottom-8 left-1/2 -translate-x-1/2 z-10 ${style === 'ipadpro' ? 'opacity-0 hover:opacity-100 transition-opacity duration-300' : ''}`}>
         <div className={`flex items-center gap-2 p-1.5 rounded-2xl backdrop-blur-xl shadow-lg transition-colors duration-500 ${isDark ? 'bg-zinc-900/80 border border-zinc-800' : 'bg-white/80 border border-zinc-200'}`}>
           <div className={`pl-3 pr-2 flex items-center gap-2 ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`}>
             <Palette size={16} />
@@ -543,7 +554,7 @@ export default function App() {
           </div>
           <div className="h-6 w-px bg-zinc-500/30 mx-1" />
           
-          {(['swiss', 'classic', 'modern', 'bauhaus', 'ipad'] as ClockStyle[]).map((s) => (
+          {(['swiss', 'classic', 'modern', 'bauhaus', 'ipad', 'ipadpro'] as ClockStyle[]).map((s) => (
             <button
               key={s}
               onClick={() => setStyle(s)}
